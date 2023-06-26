@@ -3,6 +3,7 @@
 # NOTE
 
 To get into the corresponding project - go to the desired folder in the terminal, for example: cd 3.File-Manager
+and then enter command npm run ...
 
 1. NodeJs & npm introduction
 
