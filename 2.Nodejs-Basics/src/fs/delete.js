@@ -1,23 +1,17 @@
-import fs from "fs";
-
-const fileToRemove = "./src/fs/files/fileToRemove.txt";
+import fs from "fs/promises";
+import path from "path";
+import { getDirName } from "../utils/getDirName.js";
+import { DEFAULT_FS_ERROR_MESSAGE } from "../constants.js";
 
 const remove = async () => {
-    try {
-        const isFileExist = await fs.promises
-            .access(fileToRemove, fs.constants.F_OK)
-            .then(() => true)
-            .catch(() => false);
+  try {
+    const dirName = getDirName(import.meta.url);
+    const removePath = path.join(dirName, "files", "fileToRemove.txt");
 
-        if (!isFileExist) {
-            throw new Error("FS operation failed: fileToRemove.txt does not exist");
-        }
-
-        await fs.promises.unlink(fileToRemove);
-        console.log("File fileToRemove.txt deleted successfully.");
-    } catch (err) {
-        console.error(err.message);
-    }
+    await fs.rm(removePath);
+  } catch (error) {
+    throw new Error(DEFAULT_FS_ERROR_MESSAGE, { cause: error });
+  }
 };
 
 await remove();

@@ -1,23 +1,19 @@
-import fs from "fs";
-
-const fileToRead = "./src/fs/files/fileToRead.txt";
+import fs from "fs/promises";
+import path from "path";
+import { getDirName } from "../utils/getDirName.js";
+import { DEFAULT_FS_ERROR_MESSAGE } from "../constants.js";
 
 const read = async () => {
-    try {
-        const isFileExist = await fs.promises
-            .access(fileToRead, fs.constants.F_OK)
-            .then(() => true)
-            .catch(() => false);
+  try {
+    const dirName = getDirName(import.meta.url);
+    const readPath = path.join(dirName, "files", "fileToRead.txt");
 
-        if (!isFileExist) {
-            throw new Error("FS operation failed: File 'fileToRead.txt', does not exist");
-        }
+    const fileContent = await fs.readFile(readPath, { encoding: "utf-8" });
 
-        const fileContent = await fs.promises.readFile(fileToRead, "utf-8");
-        console.log(fileContent); // file content here
-    } catch (err) {
-        console.error(err.message);
-    }
+    console.log(fileContent);
+  } catch (error) {
+    throw new Error(DEFAULT_FS_ERROR_MESSAGE, { cause: error });
+  }
 };
 
 await read();

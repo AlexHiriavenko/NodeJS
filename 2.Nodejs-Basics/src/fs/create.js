@@ -1,24 +1,18 @@
-import fs from "fs";
-
-const fileContent = "I am fresh and young";
-const fileFresh = "./src/fs/files/fresh.txt";
+import fs from "fs/promises";
+import path from "path";
+import { getDirName } from "../utils/getDirName.js";
+import { DEFAULT_FS_ERROR_MESSAGE } from "../constants.js";
 
 const create = async () => {
-    try {
-        const isFileFreshExist = await fs.promises
-            .access(fileFresh, fs.constants.F_OK)
-            .then(() => true)
-            .catch(() => false);
+  try {
+    const dirName = getDirName(import.meta.url);
+    const pathToFreshFile = path.join(dirName, "files", "fresh.txt");
+    const freshFileContent = "I am fresh and young";
 
-        if (isFileFreshExist) {
-            throw new Error("FS operation failed: file fresh.txt has already exist");
-        } else {
-            await fs.promises.writeFile(fileFresh, fileContent);
-            console.log("fresh.txt file succefully created");
-        }
-    } catch (err) {
-        console.error(err.message);
-    }
+    await fs.writeFile(pathToFreshFile, freshFileContent, { flag: "wx" });
+  } catch (error) {
+    throw new Error(DEFAULT_FS_ERROR_MESSAGE, { cause: error });
+  }
 };
 
 await create();

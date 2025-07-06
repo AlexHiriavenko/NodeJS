@@ -1,0 +1,10 @@
+**/fresh.txt
+**/properFilename.md
+**/files_copy/
+
+node_modules/
+npm-debug.log
+.env
+.env.local
+
+.vscode/

@@ -1,37 +1,30 @@
-import fs from "fs";
-
-const oldFileName = "./src/fs/files/wrongFilename.txt";
-const newFileName = "./src/fs/files/properFilename.md";
-
-const createError = (textError) => {
-    throw new Error(`FS operation failed: ${textError}`);
-};
-const textError1 = "file wrongFilename.txt doesn't exists";
-const textError2 = "file properFilename.md has already exists";
+import fs from "fs/promises";
+import path from "path";
+import { getDirName } from "../utils/getDirName.js";
+import { DEFAULT_FS_ERROR_MESSAGE } from "../constants.js";
+import { isPathExist } from "../utils/isPathExist.js";
 
 const rename = async () => {
-    try {
-        const isOldFileNameExist = await fs.promises
-            .access(oldFileName, fs.constants.F_OK)
-            .then(() => true)
-            .catch(() => false);
-        const isNewFileNameExist = await fs.promises
-            .access(newFileName, fs.constants.F_OK)
-            .then(() => true)
-            .catch(() => false);
+  try {
+    const dirName = getDirName(import.meta.url);
+    const oldPath = path.join(dirName, "files", "wrongFilename.txt");
+    const newPath = path.join(dirName, "files", "properFilename.md");
 
-        if (!isOldFileNameExist) {
-            createError(textError1);
-        } else if (isNewFileNameExist) {
-            createError(textError2);
-            // переименование файла
-        } else {
-            await fs.promises.rename(oldFileName, newFileName);
-            console.log("renamed successfully");
-        }
-    } catch (err) {
-        console.error(err.message);
+    const isExistNewPath = await isPathExist(newPath);
+
+    if (isExistNewPath) {
+      const error = new Error(`EEXIST: file or directory already exists, rename '${newPath}'`);
+      error.code = "EEXIST";
+      error.path = newPath;
+      error.syscall = "rename";
+
+      throw new Error(DEFAULT_FS_ERROR_MESSAGE, { cause: error });
     }
+
+    await fs.rename(oldPath, newPath);
+  } catch (error) {
+    throw new Error(DEFAULT_FS_ERROR_MESSAGE, { cause: error });
+  }
 };
 
 await rename();

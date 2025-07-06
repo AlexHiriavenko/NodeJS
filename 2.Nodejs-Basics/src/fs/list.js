@@ -1,24 +1,23 @@
-import fs from "fs";
-
-const filesFolder = "./src/fs/files";
+import fs from "fs/promises";
+import path from "path";
+import { getDirName } from "../utils/getDirName.js";
+import { DEFAULT_FS_ERROR_MESSAGE } from "../constants.js";
 
 const list = async () => {
-    try {
-        const isFolderExist = await fs.promises
-            .access(filesFolder, fs.constants.F_OK)
-            .then(() => true)
-            .catch(() => false);
+  try {
+    const dirName = getDirName(import.meta.url);
+    const folderPath = path.join(dirName, "files");
 
-        if (!isFolderExist) {
-            throw new Error("FS operation failed: Folder 'files' does not exist");
-        }
+    const foldersAndFilesDirents = await fs.readdir(folderPath, { withFileTypes: true });
 
-        const filenames = await fs.promises.readdir(filesFolder);
-        console.log("Files in the 'files' folder:");
-        console.log(filenames);
-    } catch (err) {
-        console.error(err.message);
-    }
+    const fileNames = foldersAndFilesDirents
+      .filter((dirent) => dirent.isFile())
+      .map((dirent) => dirent.name);
+
+    console.log(fileNames);
+  } catch (error) {
+    throw new Error(DEFAULT_FS_ERROR_MESSAGE, { cause: error });
+  }
 };
 
 await list();

@@ -1,25 +1,24 @@
-import { createReadStream, createWriteStream, promises } from "fs";
-import zlib from "node:zlib";
-import path from "node:path";
-
-const compressedFilePath = path.resolve("./src/zip/files/archive.gz");
-const decompressedFilePath = path.resolve("./src/zip/files/fileToCompress.txt");
+import { createReadStream, createWriteStream } from "fs";
+import { createGunzip } from "zlib";
+import { pipeline } from "stream/promises";
+import path from "path";
+import { getDirName } from "../utils/getDirName.js";
 
 const decompress = async () => {
-    try {
-        await new Promise((resolve, reject) => {
-            createReadStream(compressedFilePath)
-                .pipe(zlib.createGunzip())
-                .pipe(createWriteStream(decompressedFilePath))
-                .on("finish", resolve)
-                .on("error", reject);
-        });
+  try {
+    const dirName = getDirName(import.meta.url);
 
-        await promises.unlink(compressedFilePath);
-        console.log("File decompressed successfully.");
-    } catch (error) {
-        console.error("Error decompressing file:", error);
-    }
+    const pathToRead = path.join(dirName, "files", "archive.gz");
+    const pathToDecompress = path.join(dirName, "files", "fileToCompress.txt");
+
+    const readStream = createReadStream(pathToRead);
+    const writeStream = createWriteStream(pathToDecompress);
+    const decompressStream = createGunzip();
+
+    await pipeline(readStream, decompressStream, writeStream);
+  } catch (error) {
+    throw new Error("file decompress error", { cause: error });
+  }
 };
 
 await decompress();

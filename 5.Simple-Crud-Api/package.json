@@ -1,0 +1,29 @@
+{
+  "name": "crud-api",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc",
+    "start:dev": "cross-env NODE_ENV=development ts-node-dev --respawn src/app.ts",
+    "start:prod": "npm run build && cross-env NODE_ENV=production node dist/app.js",
+    "start:multi": "npm run build && cross-env NODE_ENV=cluster node dist/cluster.js",
+    "lint": "eslint . --ext .ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.4.0",
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.3.1",
+    "ts-node-dev": "^2.0.0",
+    "uuid": "^9.0.1"
+  }
+}

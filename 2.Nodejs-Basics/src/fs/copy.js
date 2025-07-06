@@ -1,46 +1,30 @@
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
-
-const filesFolder = "./src/fs/files";
-const filesCopyFolder = "./src/fs/files_copy";
+import { getDirName } from "../utils/getDirName.js";
+import { isPathExist } from "../utils/isPathExist.js";
+import { DEFAULT_FS_ERROR_MESSAGE } from "../constants.js";
 
 const copy = async () => {
-    try {
-        const isFilesFolderExist = await fs.promises
-            .access(filesFolder, fs.constants.F_OK)
-            .then(() => true)
-            .catch(() => false);
-        const isFilesCopyFolderExist = await fs.promises
-            .access(filesCopyFolder, fs.constants.F_OK)
-            .then(() => true)
-            .catch(() => false);
+  try {
+    const dirName = getDirName(import.meta.url);
+    const originalPath = path.join(dirName, "files");
+    const copyPath = path.join(dirName, "files_copy");
 
-        if (!isFilesFolderExist) {
-            throw new Error("FS operation failed: folder 'files' does not exist");
-        }
-        if (isFilesCopyFolderExist) {
-            throw new Error("FS operation failed: folder 'files_copy' has already exist");
-        }
+    const isExistsCopyPath = await isPathExist(copyPath);
 
-        // create folder "files_copy"
-        await fs.promises.mkdir(filesCopyFolder);
+    if (isExistsCopyPath) {
+      const error = new Error(`EEXIST: file or directory already exists, mkdir '${copyPath}'`);
+      error.code = "EEXIST";
+      error.path = copyPath;
+      error.syscall = "mkdir";
 
-        // content "files" folder
-        const contentFilesFolder = await fs.promises.readdir(filesFolder);
-
-        // copy all files from "files" to "files_copy"
-        const copyPromises = contentFilesFolder.map(async (file) => {
-            const sourcePath = path.join(filesFolder, file);
-            const targetPath = path.join(filesCopyFolder, file);
-            await fs.promises.copyFile(sourcePath, targetPath);
-        });
-
-        await Promise.allSettled(copyPromises);
-
-        console.log(`Files have been successfully copied. See here: ${filesCopyFolder}`);
-    } catch (err) {
-        console.error(err.message);
+      throw new Error(DEFAULT_FS_ERROR_MESSAGE, { cause: error });
     }
+
+    await fs.cp(originalPath, copyPath, { recursive: true });
+  } catch (error) {
+    throw new Error(DEFAULT_FS_ERROR_MESSAGE, { cause: error });
+  }
 };
 
 await copy();

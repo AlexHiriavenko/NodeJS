@@ -1,0 +1,28 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Env variables
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Optional: editor/OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ESLint / Prettier cache
+.eslintcache
+
+# Test output (если будешь писать тесты)
+coverage/
